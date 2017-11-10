@@ -26,7 +26,8 @@ add_arg('beta',             float,  0.35,   "Coef of WC for beam search.")
 add_arg('cutoff_prob',      float,  1.0,    "Cutoff probability for pruning.")
 add_arg('cutoff_top_n',     int,    40,     "Cutoff number for pruning.")
 add_arg('use_gru',          bool,   False,  "Use GRUs instead of simple RNNs.")
-add_arg('use_gpu',          bool,   True,   "Use GPU or not.")
+add_arg('use_gpu',          bool,   False,  "Use GPU or not.")
+add_arg('use_mkldnn',       bool,   True,  "Use MKLDNN or not.")
 add_arg('share_rnn_weights',bool,   True,   "Share input-hidden weights across "
                                             "bi-directional RNNs. Not for GRU.")
 add_arg('infer_manifest',   str,
@@ -114,7 +115,11 @@ def infer():
 
 def main():
     print_arguments(args)
+    if args.use_mkldnn:
+        print("\nuse mkldnn recommend trainer_count=1")
+        args.trainer_count = 1
     paddle.init(use_gpu=args.use_gpu,
+                use_mkldnn=args.use_mkldnn,
                 rnn_use_batch=True,
                 trainer_count=args.trainer_count)
     infer()
