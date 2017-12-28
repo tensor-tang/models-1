@@ -33,10 +33,17 @@ def main():
         ])
     parser.add_argument(
         'params_path', help='The file which stores the parameters')
+    parser.add_argument(
+        '--use_mkldnn',
+        action='store_true',
+        help='Whether to use MKL-DNN for inference on CPU')
     args = parser.parse_args()
 
     # PaddlePaddle init
-    paddle.init(use_gpu=True, trainer_count=1)
+    paddle.init(
+        use_gpu=not args.use_mkldnn,
+        use_mkldnn=args.use_mkldnn,
+        trainer_count=1)
 
     image = paddle.layer.data(
         name="image", type=paddle.data_type.dense_vector(DATA_DIM))

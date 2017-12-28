@@ -26,10 +26,17 @@ def main():
             'alexnet', 'vgg13', 'vgg16', 'vgg19', 'resnet', 'googlenet',
             'inception-resnet-v2', 'inception_v4'
         ])
+    parser.add_argument(
+        '--use_mkldnn',
+        action='store_true',
+        help='Whether to use MKL-DNN for training on CPU')
     args = parser.parse_args()
 
     # PaddlePaddle init
-    paddle.init(use_gpu=True, trainer_count=1)
+    paddle.init(
+        use_gpu=not args.use_mkldnn,
+        use_mkldnn=args.use_mkldnn,
+        trainer_count=1)
 
     image = paddle.layer.data(
         name="image", type=paddle.data_type.dense_vector(DATA_DIM))
@@ -94,11 +101,10 @@ def main():
         batch_size=BATCH_SIZE)
 
     # Create trainer
-    trainer = paddle.trainer.SGD(
-        cost=cost,
-        parameters=parameters,
-        update_equation=optimizer,
-        extra_layers=extra_layers)
+    trainer = paddle.trainer.SGD(cost=cost,
+                                 parameters=parameters,
+                                 update_equation=optimizer,
+                                 extra_layers=extra_layers)
 
     # End batch and end pass event handler
     def event_handler(event):
